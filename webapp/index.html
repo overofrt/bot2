@@ -1,144 +1,520 @@
-<script>
-    const tg = window.Telegram?.WebApp;
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Date App — 4 кліки і план готовий</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #12100e;
+      --surface: #191613;
+      --surface-2: #221e1a;
+      --border: #3a2f1e;
+      --gold: #daba6a;
+      --gold-bright: #ebd08b;
+      --text: #f5efe3;
+      --muted: #a69d8b;
+      --danger: #ff9b85;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+    }
+
+    body {
+      background-image: radial-gradient(circle at 50% -10%, rgba(218, 186, 106, 0.16), transparent 55%);
+      padding: 20px 14px 40px;
+    }
+
+    .container {
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(218, 186, 106, 0.08);
+      color: var(--gold);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.3px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--gold-bright);
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 6px;
+      border-radius: 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .tab-btn {
+      padding: 11px 10px;
+      border: none;
+      border-radius: 12px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      color: #12100e;
+      font-weight: 700;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 18px;
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+    }
+
+    .block {
+      margin-bottom: 18px;
+    }
+
+    .label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.9px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .option-btn {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #2e261b;
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.3;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      text-align: left;
+    }
+
+    .option-btn.centered {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .option-btn.active {
+      border-color: var(--gold);
+      background: rgba(218, 186, 106, 0.15);
+      color: var(--gold-bright);
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 82px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      border: 1px solid #2e261b;
+      background: var(--surface-2);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      resize: vertical;
+      outline: none;
+    }
+
+    textarea::placeholder {
+      color: #7c7466;
+    }
+
+    textarea:focus {
+      border-color: var(--gold);
+    }
+
+    .primary-btn {
+      width: 100%;
+      padding: 15px 18px;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
+      color: #12100e;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, opacity 0.15s ease;
+    }
+
+    .primary-btn:active {
+      transform: scale(0.99);
+    }
+
+    .primary-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .notice {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: 16px;
+      background: var(--surface-2);
+      border: 1px dashed var(--gold);
+      display: none;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .notice.show {
+      display: block;
+    }
+
+    .link-box {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      color: var(--gold-bright);
+      font-size: 12px;
+      word-break: break-all;
+      user-select: all;
+    }
+
+    .context-bar {
+      font-size: 12px;
+      color: var(--muted);
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+      border-bottom: 1px solid #2a2319;
+    }
+
+    .warn-text {
+      color: var(--danger);
+      font-size: 12px;
+      margin-top: 8px;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="eyebrow">Date Planner</div>
+      <h1 class="title">4 кліки — і план готовий</h1>
+      <p class="subtitle">Створи запрошення або обери формат, час і побажання для зустрічі</p>
+    </div>
+
+    <div class="tabs">
+      <button type="button" class="tab-btn active" id="tabCreate" onclick="switchTab('create')">
+        💌 Створити
+      </button>
+      <button type="button" class="tab-btn" id="tabSurvey" onclick="switchTab('survey')">
+        ✨ 4 кроки
+      </button>
+    </div>
+
+    <!-- Вкладка 1: Створення запрошення -->
+    <section class="card" id="panelCreate">
+      <div class="block">
+        <div class="label">1. Місто</div>
+        <div class="grid-2" id="citiesGrid"></div>
+      </div>
+
+      <div class="block">
+        <div class="label">2. Стиль запрошення</div>
+        <div class="stack" id="stylesList">
+          <button type="button" class="option-btn active" data-val="romantic" onclick="selectStyle(this)">
+            <span>🌹 Романтичний</span>
+            <span>✦</span>
+          </button>
+          <button type="button" class="option-btn" data-val="flirt" onclick="selectStyle(this)">
+            <span>😉 З гумором і легким фліртом</span>
+            <span>✦</span>
+          </button>
+          <button type="button" class="option-btn" data-val="cozy" onclick="selectStyle(this)">
+            <span>☕ Затишний вечір</span>
+            <span>✦</span>
+          </button>
+        </div>
+      </div>
+
+      <button type="button" class="primary-btn" id="btnCreateInvite" onclick="createInvite()">
+        Згенерувати запрошення
+      </button>
+
+      <div class="notice" id="createNotice">
+        <div style="font-weight: 700; color: var(--gold-bright);">Запрошення створено</div>
+        <div style="color: var(--muted); margin-top: 4px;">
+          Надішли це посилання другій людині — відповідь прийде тобі в бот:
+        </div>
+        <div class="link-box" id="inviteLinkText"></div>
+        <div id="createExtraWarning"></div>
+      </div>
+    </section>
+
+    <!-- Вкладка 2: 4 кроки відповіді -->
+    <section class="card hidden" id="panelSurvey">
+      <div class="context-bar" id="surveyContext">Обери варіанти на 4 кроках та надішли відповідь</div>
+
+      <div class="block">
+        <div class="label">Крок 1 · Що їмо / п'ємо</div>
+        <div class="grid-2" id="foodGroup">
+          <button type="button" class="option-btn centered active" data-val="Кава та десерти" onclick="pickValue('food', this, 'foodGroup')">☕ Кава / десерти</button>
+          <button type="button" class="option-btn centered" data-val="Суші або азійська" onclick="pickValue('food', this, 'foodGroup')">🍣 Суші / Азія</button>
+          <button type="button" class="option-btn centered" data-val="Піца та паста" onclick="pickValue('food', this, 'foodGroup')">🍕 Піца / Паста</button>
+          <button type="button" class="option-btn centered" data-val="Стейк або гриль" onclick="pickValue('food', this, 'foodGroup')">🥩 М'ясо / Гриль</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="label">Крок 2 · Формат та місце</div>
+        <div class="grid-2" id="activityGroup">
+          <button type="button" class="option-btn centered active" data-val="Затишна кав'ярня" onclick="pickValue('activity', this, 'activityGroup')">☕ Кав'ярня</button>
+          <button type="button" class="option-btn centered" data-val="Вечірня прогулянка" onclick="pickValue('activity', this, 'activityGroup')">🌙 Прогулянка</button>
+          <button type="button" class="option-btn centered" data-val="Кіно або бар" onclick="pickValue('activity', this, 'activityGroup')">🎬 Кіно / Бар</button>
+          <button type="button" class="option-btn centered" data-val="Ігри або активний відпочинок" onclick="pickValue('activity', this, 'activityGroup')">🎲 Активності</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="label">Крок 3 · Коли зручно</div>
+        <div class="grid-2" id="dayGroup">
+          <button type="button" class="option-btn centered active" data-val="Сьогодні" onclick="pickValue('day', this, 'dayGroup')">Сьогодні</button>
+          <button type="button" class="option-btn centered" data-val="Завтра" onclick="pickValue('day', this, 'dayGroup')">Завтра</button>
+          <button type="button" class="option-btn centered" data-val="П'ятниця" onclick="pickValue('day', this, 'dayGroup')">П'ятниця</button>
+          <button type="button" class="option-btn centered" data-val="Вихідні" onclick="pickValue('day', this, 'dayGroup')">Вихідні</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="label">Крок 4 · Час дня</div>
+        <div class="grid-2" id="timeGroup">
+          <button type="button" class="option-btn centered active" data-val="17:00" onclick="pickValue('time_slot', this, 'timeGroup')">17:00</button>
+          <button type="button" class="option-btn centered" data-val="19:00" onclick="pickValue('time_slot', this, 'timeGroup')">19:00</button>
+          <button type="button" class="option-btn centered" data-val="20:30" onclick="pickValue('time_slot', this, 'timeGroup')">20:30</button>
+          <button type="button" class="option-btn centered" data-val="Гнучкий час" onclick="pickValue('time_slot', this, 'timeGroup')">Гнучкий час</button>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="label">Додаткова інформація / побажання</div>
+        <textarea id="noteField" placeholder="Напиши побажання щодо місця, часу або настрою..."></textarea>
+      </div>
+
+      <button type="button" class="primary-btn" id="btnSubmitSurvey" onclick="submitSurvey()">
+        Надіслати відповідь
+      </button>
+
+      <div class="notice" id="surveyNotice"></div>
+    </section>
+  </div>
+
+  <script>
+    const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const inviteCode = urlParams.get("invite") || tg?.initDataUnsafe?.start_param || "";
+    const params = new URLSearchParams(window.location.search);
+    const inviteCode = params.get("invite") || (tg && tg.initDataUnsafe && tg.initDataUnsafe.start_param) || "";
 
     let selectedCity = "Київ";
     let selectedStyle = "romantic";
-    const surveyState = {
+    const answers = {
       food: "Кава та десерти",
-      activity: "Прогулянка ввечері",
+      activity: "Затишна кав'ярня",
       day: "Сьогодні",
-      time_slot: "17:00",
+      time_slot: "17:00"
     };
 
     function switchTab(tab) {
-      const isCreate = tab === "create";
-      document.getElementById("tabCreate").classList.toggle("active", isCreate);
-      document.getElementById("tabSurvey").classList.toggle("active", !isCreate);
-      document.getElementById("panelCreate").classList.toggle("hidden", !isCreate);
-      document.getElementById("panelSurvey").classList.toggle("hidden", isCreate);
+      const createActive = tab === "create";
+      document.getElementById("tabCreate").classList.toggle("active", createActive);
+      document.getElementById("tabSurvey").classList.toggle("active", !createActive);
+      document.getElementById("panelCreate").classList.toggle("hidden", !createActive);
+      document.getElementById("panelSurvey").classList.toggle("hidden", createActive);
     }
 
     function selectStyle(el) {
-      document.querySelectorAll("#stylesStack .pill").forEach((b) => b.classList.remove("active"));
+      document.querySelectorAll("#stylesList .option-btn").forEach((btn) => btn.classList.remove("active"));
       el.classList.add("active");
       selectedStyle = el.dataset.val;
     }
 
-    function pickOption(field, el, containerId) {
-      document.querySelectorAll(`#${containerId} .pill`).forEach((b) => b.classList.remove("active"));
+    function pickValue(field, el, groupId) {
+      document.querySelectorAll("#" + groupId + " .option-btn").forEach((btn) => btn.classList.remove("active"));
       el.classList.add("active");
-      surveyState[field] = el.dataset.val;
+      answers[field] = el.dataset.val;
     }
 
     async function loadCities() {
       const grid = document.getElementById("citiesGrid");
       try {
-        const res = await fetch("/api/cities");
-        const data = await res.json();
-        const cities = data.cities?.length ? data.cities : ["Київ", "Львів"];
+        const resp = await fetch("/api/cities");
+        const data = await resp.json();
+        const cities = data.cities && data.cities.length ? data.cities : ["Київ", "Львів"];
         grid.innerHTML = "";
         cities.forEach((city, idx) => {
           const btn = document.createElement("button");
           btn.type = "button";
-          btn.className = "pill center" + (idx === 0 ? " active" : "");
+          btn.className = "option-btn centered" + (idx === 0 ? " active" : "");
           btn.textContent = "📍 " + city;
           if (idx === 0) selectedCity = city;
           btn.onclick = () => {
-            document.querySelectorAll("#citiesGrid .pill").forEach((x) => x.classList.remove("active"));
+            document.querySelectorAll("#citiesGrid .option-btn").forEach((b) => b.classList.remove("active"));
             btn.classList.add("active");
             selectedCity = city;
           };
           grid.appendChild(btn);
         });
-      } catch {
-        grid.innerHTML = `<button type="button" class="pill center active">📍 Київ</button>`;
+      } catch (_) {
+        grid.innerHTML = '<button type="button" class="option-btn centered active">📍 Київ</button>';
       }
     }
 
-    async function generateInvite() {
-      const senderId = tg?.initDataUnsafe?.user?.id || 0;
-      const res = await fetch("/api/invites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sender_tg_id: senderId,
-          city_name: selectedCity,
-          style: selectedStyle,
-        }),
-      });
-      const data = await res.json();
-      const box = document.getElementById("inviteResult");
-      const codeEl = document.getElementById("generatedLink");
-      const link = data.bot_link || data.webapp_link;
-      codeEl.textContent = link;
-      box.classList.add("show");
+    async function createInvite() {
+      const btn = document.getElementById("btnCreateInvite");
+      btn.disabled = true;
+      try {
+        const senderId = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : 0;
+        const resp = await fetch("/api/invites", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sender_tg_id: senderId,
+            city_name: selectedCity,
+            style: selectedStyle
+          })
+        });
+        const data = await resp.json();
+        const link = data.bot_link || data.webapp_link || "";
 
-      if (!data.sender_saved) {
-        box.insertAdjacentHTML(
-          "beforeend",
-          `<div style="font-size:12px;color:#ffb4a2;margin-top:8px;">⚠️ Відкрий Mini App саме всередині Telegram, щоб бот знав твій ID і міг надіслати тобі відповідь.</div>`
-        );
-      }
+        document.getElementById("inviteLinkText").textContent = link;
+        document.getElementById("createExtraWarning").innerHTML = data.sender_saved
+          ? ""
+          : '<div class="warn-text">⚠️ Відкрий Mini App усередині Telegram, щоб бот знав твій ID і міг надіслати тобі відповідь.</div>';
+        document.getElementById("createNotice").classList.add("show");
 
-      if (navigator.clipboard && link) {
-        try {
-          await navigator.clipboard.writeText(link);
-        } catch {}
+        if (link && navigator.clipboard && navigator.clipboard.writeText) {
+          try { await navigator.clipboard.writeText(link); } catch (_) {}
+        }
+      } finally {
+        btn.disabled = false;
       }
     }
 
     async function submitSurvey() {
-      const note = document.getElementById("noteInput").value.trim();
-      const box = document.getElementById("surveyResult");
-      const user = tg?.initDataUnsafe?.user || {};
+      const notice = document.getElementById("surveyNotice");
+      const btn = document.getElementById("btnSubmitSurvey");
+      const note = document.getElementById("noteField").value.trim();
+      const user = tg && tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user : {};
       const guestName = [user.first_name, user.last_name].filter(Boolean).join(" ");
       const guestUsername = user.username || "";
 
       if (!inviteCode) {
-        box.classList.add("show");
-        box.innerHTML = `<span style="color: var(--gold-bright);">Немає коду запрошення у посиланні.</span><br>Перейди за посиланням від людини, яка тебе запросила.`;
+        notice.classList.add("show");
+        notice.innerHTML = '<span style="color: var(--gold-bright);">Не знайдено код запрошення.</span><br>Перейди за посиланням від людини, яка тебе запросила.';
         return;
       }
 
-      const res = await fetch(`/api/invites/${encodeURIComponent(inviteCode)}/complete`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...surveyState,
-          note,
-          guest_name: guestName,
-          guest_username: guestUsername,
-        }),
-      });
-      const data = await res.json();
-      box.classList.add("show");
-      if (data.ok) {
-        box.innerHTML = `<b style="color: var(--gold-bright);">Готово!</b> Твій вибір (місце, їжа, час і нотатка) надіслано людині, яка тебе запросила.`;
-      } else {
-        box.innerHTML = `<span style="color:#ffb4a2;">Помилка: ${data.error || "не вдалося надіслати"}</span>`;
+      btn.disabled = true;
+      try {
+        const resp = await fetch("/api/invites/" + encodeURIComponent(inviteCode) + "/complete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...answers,
+            note: note,
+            guest_name: guestName,
+            guest_username: guestUsername
+          })
+        });
+        const data = await resp.json();
+        notice.classList.add("show");
+        if (data.ok) {
+          notice.innerHTML = '<b style="color: var(--gold-bright);">Відповідь надіслано!</b> Людина, яка запросила тебе, уже отримала деталі в боті.';
+        } else {
+          notice.innerHTML = '<span class="warn-text">Помилка: ' + (data.error || "не вдалося надіслати") + "</span>";
+        }
+      } finally {
+        btn.disabled = false;
       }
     }
 
-    async function initInviteContext() {
+    async function initInvite() {
       if (!inviteCode) return;
       try {
-        const res = await fetch(`/api/invites/${encodeURIComponent(inviteCode)}`);
-        if (!res.ok) return;
-        const data = await res.json();
+        const resp = await fetch("/api/invites/" + encodeURIComponent(inviteCode));
+        if (!resp.ok) return;
+        const data = await resp.json();
         document.getElementById("surveyContext").textContent =
-          `Запрошення #${data.code} · Місто: ${data.city_name}`;
+          "Запрошення #" + data.code + " · Місто: " + data.city_name;
         switchTab("survey");
-      } catch {}
+      } catch (_) {}
     }
 
     loadCities();
-    initInviteContext();
+    initInvite();
   </script>
+</body>
 </html>
