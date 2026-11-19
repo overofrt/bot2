@@ -270,9 +270,6 @@ async def submit_survey(
 )
 async def text_instead_of_button(message: Message) -> None:
     await message.answer("👇 Будь ласка, обери один із варіантів на кнопках під повідомленням.")
-)
-async def text_instead_of_button(message: Message) -> None:
-    await message.answer("👇 Будь ласка, обери один із варіантів на кнопках під повідомленням.")
 
 
 @router.callback_query(F.data.startswith("srv:"))
