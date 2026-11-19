@@ -64,10 +64,11 @@ DEFAULT_CITIES = [
 
 async def init_db(session_factory: async_sessionmaker[AsyncSession]) -> None:
     async with session_factory() as session:
-        async with session.begin():
-            engine = session.bind
-            await engine.run_sync(Base.metadata.create_all)
+        engine = session.bind
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
+        async with session.begin():
             existing = (await session.execute(select(City.id).limit(1))).first()
             if not existing:
                 for city_name in DEFAULT_CITIES:
