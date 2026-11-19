@@ -262,9 +262,14 @@ async def submit_survey(
 
     await callback.answer()
 
-
 @router.message(
-    RecipientSurvey.step_food | RecipientSurvey.step_activity | RecipientSurvey.step_day | RecipientSurvey.step_time
+    RecipientSurvey.step_food,
+    RecipientSurvey.step_activity,
+    RecipientSurvey.step_day,
+    RecipientSurvey.step_time,
+)
+async def text_instead_of_button(message: Message) -> None:
+    await message.answer("👇 Будь ласка, обери один із варіантів на кнопках під повідомленням.")
 )
 async def text_instead_of_button(message: Message) -> None:
     await message.answer("👇 Будь ласка, обери один із варіантів на кнопках під повідомленням.")
