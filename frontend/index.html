@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <!-- Підключаємо Telegram Web Apps SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Тут буде ваш красивий темний CSS у стилі золотих банерів */
+        body { background: #12100e; color: #f2eae6; font-family: sans-serif; }
+        .container { padding: 20px; }
+        h1 { color: #daba6a; }
+        .select-group, .style-group { margin-bottom: 20px; }
+        select, .radio-btn { width: 100%; padding: 10px; background: #221f1c; border: 1px solid #4b3f2a; }
+        button { width: 100%; padding: 15px; background: #daba6a; color: #12100e; border: none; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Створити запрошення</h1>
+
+        <div class="select-group">
+            <label>Обери місто:</label>
+            <select id="city-select">
+                <!-- Динамічно заповнюється через JS з БД -->
+                <option value="kyiv">Київ</option>
+                <option value="lviv">Львів</option>
+            </select>
+        </div>
+
+        <div class="style-group">
+            <label>Стиль спілкування:</label>
+            <div class="radio-btn" onclick="setStyle('romantic')">🌹 Романтичний</div>
+            <div class="radio-btn" onclick="setStyle('flirt')">😉 З гумором / легкий флірт</div>
+        </div>
+
+        <button id="generate-btn">💌 Згенерувати</button>
+    </div>
+
+    <script>
+        // JavaScript логіка для взаємодії з Python і Telegram
+        let selectedStyle = 'romantic';
+        const tg = window.Telegram.WebApp;
+
+        tg.expand(); // Розгорнути додаток на весь екран
+
+        document.getElementById('generate-btn').onclick = function() {
+            const city = document.getElementById('city-select').value;
+
+            // Відправляємо дані на ваш Python бекенд-сервер
+            // наприклад, через fetch('/api/create_invite')
+            // Після отримання відповіді:
+            // tg.sendData(JSON.stringify({invite_link: result_link}))
+        };
+
+        function setStyle(style) {
+            selectedStyle = style;
+            // Візуально підсвітити вибраний стиль
+        }
+    </script>
+</body>
+</html>
