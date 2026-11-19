@@ -1,323 +1,4 @@
-<!DOCTYPE html>
-<html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Date App — Mini App</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root {
-      --bg: #12100e;
-      --card: #1a1714;
-      --card-2: #231f1b;
-      --border: #3d3221;
-      --gold: #daba6a;
-      --gold-bright: #ebd08b;
-      --text: #f3eee4;
-      --muted: #a69e8e;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      background: radial-gradient(circle at top, #241d12 0%, var(--bg) 58%);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      min-height: 100vh;
-      padding: 18px 14px 36px;
-    }
-
-    .wrap {
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .hero {
-      text-align: center;
-      margin-bottom: 18px;
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 11px;
-      letter-spacing: 1.4px;
-      text-transform: uppercase;
-      color: var(--gold);
-      border: 1px solid var(--border);
-      background: rgba(218, 186, 106, 0.08);
-      padding: 5px 12px;
-      border-radius: 999px;
-      margin-bottom: 10px;
-    }
-
-    h1 {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--gold-bright);
-      margin-bottom: 6px;
-    }
-
-    .subtitle {
-      font-size: 14px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-
-    .tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      padding: 6px;
-      border-radius: 16px;
-      margin-bottom: 16px;
-    }
-
-    .tab {
-      padding: 10px;
-      border-radius: 12px;
-      border: none;
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .tab.active {
-      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-      color: #12100e;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 22px;
-      padding: 18px;
-      box-shadow: 0 14px 35px rgba(0, 0, 0, 0.45);
-    }
-
-    .section-title {
-      font-size: 12px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.9px;
-      color: var(--gold);
-      margin-bottom: 10px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
-
-    .stack {
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-      margin-bottom: 18px;
-    }
-
-    .pill {
-      background: var(--card-2);
-      border: 1px solid #2f281d;
-      color: var(--text);
-      border-radius: 14px;
-      padding: 12px 14px;
-      font-size: 14px;
-      text-align: left;
-      cursor: pointer;
-      transition: 0.15s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .pill.center {
-      justify-content: center;
-      text-align: center;
-    }
-
-    .pill.active {
-      border-color: var(--gold);
-      background: rgba(218, 186, 106, 0.14);
-      color: var(--gold-bright);
-      font-weight: 600;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 76px;
-      background: var(--card-2);
-      border: 1px solid #2f281d;
-      border-radius: 14px;
-      padding: 12px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 14px;
-      resize: vertical;
-      margin-bottom: 18px;
-      outline: none;
-    }
-
-    textarea:focus {
-      border-color: var(--gold);
-    }
-
-    .btn-primary {
-      width: 100%;
-      padding: 15px 18px;
-      border: none;
-      border-radius: 16px;
-      background: linear-gradient(135deg, var(--gold-bright), var(--gold));
-      color: #12100e;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.12s, opacity 0.15s;
-    }
-
-    .btn-primary:active {
-      transform: scale(0.99);
-    }
-
-    .result-box {
-      margin-top: 16px;
-      background: var(--card-2);
-      border: 1px dashed var(--gold);
-      border-radius: 16px;
-      padding: 14px;
-      display: none;
-    }
-
-    .result-box.show {
-      display: block;
-    }
-
-    .link-code {
-      display: block;
-      margin-top: 8px;
-      padding: 10px;
-      background: #12100e;
-      border-radius: 10px;
-      font-size: 12px;
-      color: var(--gold-bright);
-      word-break: break-all;
-      user-select: all;
-    }
-
-    .step-progress {
-      font-size: 12px;
-      color: var(--muted);
-      margin-bottom: 12px;
-    }
-
-    .hidden {
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <div class="hero">
-      <div class="badge">Premium Date Planner</div>
-      <h1>Date App</h1>
-      <p class="subtitle">Створи запрошення за пару секунд або обери ідеальний сценарій зустрічі</p>
-    </div>
-
-    <div class="tabs">
-      <button class="tab active" id="tabCreate" onclick="switchTab('create')">💌 Створити</button>
-      <button class="tab" id="tabSurvey" onclick="switchTab('survey')">✨ 4 кроки</button>
-    </div>
-
-    <!-- ВКЛАДКА 1: СТВОРЕННЯ ЗАПРОШЕННЯ -->
-    <div class="card" id="panelCreate">
-      <div class="section-title">1. Місто зустрічі</div>
-      <div class="grid-2" id="citiesGrid"></div>
-
-      <div class="section-title">2. Стиль запрошення</div>
-      <div class="stack" id="stylesStack">
-        <button type="button" class="pill active" data-val="romantic" onclick="selectStyle(this)">
-          <span>🌹 Романтичний</span><span>✦</span>
-        </button>
-        <button type="button" class="pill" data-val="flirt" onclick="selectStyle(this)">
-          <span>😉 З гумором та легким фліртом</span><span>✦</span>
-        </button>
-        <button type="button" class="pill" data-val="cozy" onclick="selectStyle(this)">
-          <span>☕ Затишний / вечірній</span><span>✦</span>
-        </button>
-      </div>
-
-      <button type="button" class="btn-primary" id="btnGenerate" onclick="generateInvite()">
-        Згенерувати запрошення
-      </button>
-
-      <div class="result-box" id="inviteResult">
-        <div style="font-weight: 700; color: var(--gold-bright);">Запрошення готове!</div>
-        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">
-          Надішли посилання людині, яку запрошуєш:
-        </div>
-        <code class="link-code" id="generatedLink"></code>
-      </div>
-    </div>
-
-    <!-- ВКЛАДКА 2: 4 КРОКИ -->
-    <div class="card hidden" id="panelSurvey">
-      <div class="step-progress" id="surveyContext">Режим заповнення сценарію зустрічі</div>
-
-      <div class="section-title">Крок 1 · Що їмо / п’ємо</div>
-      <div class="grid-2" id="foodOptions">
-        <button type="button" class="pill center active" data-val="Кава та десерти" onclick="pickOption('food', this, 'foodOptions')">☕ Кава та десерти</button>
-        <button type="button" class="pill center" data-val="Суші або азійська" onclick="pickOption('food', this, 'foodOptions')">🍣 Суші / Азія</button>
-        <button type="button" class="pill center" data-val="Піца та паста" onclick="pickOption('food', this, 'foodOptions')">🍕 Піца / Паста</button>
-        <button type="button" class="pill center" data-val="Стейк або гриль" onclick="pickOption('food', this, 'foodOptions')">🥩 М'ясо / Гриль</button>
-      </div>
-
-      <div class="section-title">Крок 2 · Чим займемось</div>
-      <div class="grid-2" id="activityOptions">
-        <button type="button" class="pill center active" data-val="Прогулянка ввечері" onclick="pickOption('activity', this, 'activityOptions')">🌙 Прогулянка</button>
-        <button type="button" class="pill center" data-val="Кіно або серіали" onclick="pickOption('activity', this, 'activityOptions')">🎬 Кіно</button>
-        <button type="button" class="pill center" data-val="Настільні ігри / бар" onclick="pickOption('activity', this, 'activityOptions')">🎲 Ігри / Бар</button>
-        <button type="button" class="pill center" data-val="Фотосет та кав'ярні" onclick="pickOption('activity', this, 'activityOptions')">📸 Кав'ярні</button>
-      </div>
-
-      <div class="section-title">Крок 3 · Коли зручно</div>
-      <div class="grid-2" id="dayOptions">
-        <button type="button" class="pill center active" data-val="Сьогодні" onclick="pickOption('day', this, 'dayOptions')">Сьогодні</button>
-        <button type="button" class="pill center" data-val="Завтра" onclick="pickOption('day', this, 'dayOptions')">Завтра</button>
-        <button type="button" class="pill center" data-val="П'ятниця" onclick="pickOption('day', this, 'dayOptions')">П'ятниця</button>
-        <button type="button" class="pill center" data-val="Вихідні" onclick="pickOption('day', this, 'dayOptions')">Вихідні</button>
-      </div>
-
-      <div class="section-title">Крок 4 · Час дня</div>
-      <div class="grid-2" id="timeOptions">
-        <button type="button" class="pill center active" data-val="17:00" onclick="pickOption('time_slot', this, 'timeOptions')">17:00</button>
-        <button type="button" class="pill center" data-val="19:00" onclick="pickOption('time_slot', this, 'timeOptions')">19:00</button>
-        <button type="button" class="pill center" data-val="20:30" onclick="pickOption('time_slot', this, 'timeOptions')">20:30</button>
-        <button type="button" class="pill center" data-val="Гнучкий час" onclick="pickOption('time_slot', this, 'timeOptions')">Гнучкий час</button>
-      </div>
-
-      <div class="section-title">Побажання або нотатка (необов’язково)</div>
-      <textarea id="noteInput" placeholder="Наприклад: хочу тихий столик біля вікна..."></textarea>
-
-      <button type="button" class="btn-primary" onclick="submitSurvey()">
-        Підтвердити та надіслати
-      </button>
-
-      <div class="result-box" id="surveyResult"></div>
-    </div>
-  </div>
-
-  <script>
+<script>
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
@@ -395,16 +76,34 @@
       const data = await res.json();
       const box = document.getElementById("inviteResult");
       const codeEl = document.getElementById("generatedLink");
-      codeEl.textContent = data.bot_link || data.webapp_link;
+      const link = data.bot_link || data.webapp_link;
+      codeEl.textContent = link;
       box.classList.add("show");
+
+      if (!data.sender_saved) {
+        box.insertAdjacentHTML(
+          "beforeend",
+          `<div style="font-size:12px;color:#ffb4a2;margin-top:8px;">⚠️ Відкрий Mini App саме всередині Telegram, щоб бот знав твій ID і міг надіслати тобі відповідь.</div>`
+        );
+      }
+
+      if (navigator.clipboard && link) {
+        try {
+          await navigator.clipboard.writeText(link);
+        } catch {}
+      }
     }
 
     async function submitSurvey() {
       const note = document.getElementById("noteInput").value.trim();
       const box = document.getElementById("surveyResult");
+      const user = tg?.initDataUnsafe?.user || {};
+      const guestName = [user.first_name, user.last_name].filter(Boolean).join(" ");
+      const guestUsername = user.username || "";
+
       if (!inviteCode) {
         box.classList.add("show");
-        box.innerHTML = `<span style="color: var(--gold-bright);">Вибір збережено локально:</span><br>${surveyState.food} · ${surveyState.activity} · ${surveyState.day} · ${surveyState.time_slot}`;
+        box.innerHTML = `<span style="color: var(--gold-bright);">Немає коду запрошення у посиланні.</span><br>Перейди за посиланням від людини, яка тебе запросила.`;
         return;
       }
 
@@ -414,14 +113,16 @@
         body: JSON.stringify({
           ...surveyState,
           note,
+          guest_name: guestName,
+          guest_username: guestUsername,
         }),
       });
       const data = await res.json();
       box.classList.add("show");
       if (data.ok) {
-        box.innerHTML = `<b style="color: var(--gold-bright);">Готово!</b> Відповіді надіслано відправнику в Telegram.`;
+        box.innerHTML = `<b style="color: var(--gold-bright);">Готово!</b> Твій вибір (місце, їжа, час і нотатка) надіслано людині, яка тебе запросила.`;
       } else {
-        box.innerHTML = `Помилка: ${data.error || "не вдалося зберегти"}`;
+        box.innerHTML = `<span style="color:#ffb4a2;">Помилка: ${data.error || "не вдалося надіслати"}</span>`;
       }
     }
 
@@ -434,13 +135,10 @@
         document.getElementById("surveyContext").textContent =
           `Запрошення #${data.code} · Місто: ${data.city_name}`;
         switchTab("survey");
-      } catch {
-        // ігноруємо, якщо код не знайдено
-      }
+      } catch {}
     }
 
     loadCities();
     initInviteContext();
   </script>
-</body>
 </html>
