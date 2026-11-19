@@ -1,4 +1,5 @@
 import asyncio
+import html
 import logging
 import os
 from datetime import datetime
@@ -7,7 +8,7 @@ from pathlib import Path
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
     InlineKeyboardButton,
@@ -29,22 +30,57 @@ def build_dispatcher() -> Dispatcher:
     dp = Dispatcher(storage=MemoryStorage())
 
     @dp.message(CommandStart())
-    async def cmd_start(message: Message, bot: Bot) -> None:
+    async def cmd_start(message: Message, command: CommandObject, bot: Bot, session_factory) -> None:
         me = await bot.get_me()
-        app_url = WEBAPP_URL or f"https://t.me/{me.username}"
+        invite_code = (command.args or "").strip()
+        base_url = WEBAPP_URL.rstrip("/") if WEBAPP_URL.startswith("https://") else f"https://t.me/{me.username}"
+
+        if invite_code:
+            async with session_factory() as session:
+                invite = (
+                    await session.execute(select(Invite).where(Invite.code == invite_code))
+                ).scalar_one_or_none()
+
+            if not invite:
+                await message.answer("⚠️ Запрошення не знайдено або воно вже неактивне.")
+                return
+
+            target_url = (
+                f"{base_url}?invite={invite.code}"
+                if WEBAPP_URL.startswith("https://")
+                else base_url
+            )
+            kb = InlineKeyboardMarkup(
+                inline_keyboard=[
+                    [
+                        InlineKeyboardButton(
+                            text="💌 Відкрити запрошення",
+                            web_app=WebAppInfo(url=target_url) if WEBAPP_URL.startswith("https://") else None,
+                            url=target_url if not WEBAPP_URL.startswith("https://") else None,
+                        )
+                    ]
+                ]
+            )
+            await message.answer(
+                f"✨ Тебе запросили на зустріч у місті <b>{html.escape(invite.city_name)}</b>!\n"
+                f"Натисни кнопку нижче, щоб обрати формат, час і надіслати відповідь:",
+                reply_markup=kb,
+            )
+            return
+
         kb = InlineKeyboardMarkup(
             inline_keyboard=[
                 [
                     InlineKeyboardButton(
                         text="✨ Відкрити інтерфейс",
-                        web_app=WebAppInfo(url=app_url) if app_url.startswith("https://") else None,
-                        url=app_url if not app_url.startswith("https://") else None,
+                        web_app=WebAppInfo(url=base_url) if WEBAPP_URL.startswith("https://") else None,
+                        url=base_url if not WEBAPP_URL.startswith("https://") else None,
                     )
                 ]
             ]
         )
         await message.answer(
-            "<b>Date App</b> — відкрий інтерфейс, щоб створити запрошення або пройти 4 кроки побачення.",
+            "<b>Date App</b> — відкрий інтерфейс, щоб створити запрошення та отримати відповідь у цей чат.",
             reply_markup=kb,
         )
 
@@ -67,7 +103,7 @@ def build_dispatcher() -> Dispatcher:
 
     @dp.message(F.web_app_data)
     async def on_webapp_data(message: Message) -> None:
-        await message.answer(f"Отримано дані з Mini App: <code>{message.web_app_data.data}</code>")
+        await message.answer(f"Отримано дані: <code>{html.escape(message.web_app_data.data)}</code>")
 
     return dp
 
@@ -104,18 +140,19 @@ def build_web_app(bot: Bot, session_factory) -> web.Application:
             await session.refresh(invite)
 
         me = await bot.get_me()
+        bot_link = f"https://t.me/{me.username}?start={invite.code}"
         webapp_link = (
             f"{WEBAPP_URL.rstrip('/')}?invite={invite.code}"
-            if WEBAPP_URL
-            else f"https://t.me/{me.username}?start={invite.code}"
+            if WEBAPP_URL.startswith("https://")
+            else bot_link
         )
-        bot_link = f"https://t.me/{me.username}?start={invite.code}"
 
         return web.json_response(
             {
                 "code": invite.code,
                 "city_name": invite.city_name,
                 "style": invite.style,
+                "sender_saved": sender_tg_id > 0,
                 "webapp_link": webapp_link,
                 "bot_link": bot_link,
             }
@@ -154,6 +191,8 @@ def build_web_app(bot: Bot, session_factory) -> web.Application:
         day = str(payload.get("day") or "").strip()
         time_slot = str(payload.get("time_slot") or "").strip()
         note = str(payload.get("note") or "").strip()
+        guest_name = str(payload.get("guest_name") or "").strip()
+        guest_username = str(payload.get("guest_username") or "").strip()
 
         async with session_factory() as session:
             async with session.begin():
@@ -170,21 +209,45 @@ def build_web_app(bot: Bot, session_factory) -> web.Application:
                 invite.note = note
                 invite.completed_at = datetime.utcnow()
 
-        if invite.sender_tg_id:
-            summary = (
-                f"💌 <b>Запрошення підтверджено!</b>\n\n"
-                f"📍 Місто: <b>{invite.city_name}</b>\n"
-                f"🍽 Формат їжі: <b>{food}</b>\n"
-                f"✨ Активність: <b>{activity}</b>\n"
-                f"📅 День: <b>{day}</b>\n"
-                f"⏰ Час: <b>{time_slot}</b>"
+        if not invite.sender_tg_id:
+            return web.json_response(
+                {
+                    "ok": False,
+                    "error": "Відправник створив посилання поза Telegram, тому бот не знає його ID.",
+                },
+                status=400,
             )
-            if note:
-                summary += f"\n📝 Нотатка: <i>{note}</i>"
-            try:
-                await bot.send_message(chat_id=invite.sender_tg_id, text=summary)
-            except Exception as exc:
-                logging.warning("Не вдалося надіслати повідомлення відправнику: %s", exc)
+
+        who_parts = []
+        if guest_name:
+            who_parts.append(html.escape(guest_name))
+        if guest_username:
+            who_parts.append(f"(@{html.escape(guest_username.lstrip('@'))})")
+        who_line = " ".join(who_parts) if who_parts else "Запрошена людина"
+
+        summary = (
+            f"💌 <b>Відповідь на твоє запрошення!</b>\n\n"
+            f"👤 Від кого: <b>{who_line}</b>\n"
+            f"📍 Місто: <b>{html.escape(invite.city_name)}</b>\n"
+            f"🍽 Їжа / напої: <b>{html.escape(food)}</b>\n"
+            f"✨ Активність: <b>{html.escape(activity)}</b>\n"
+            f"📅 День: <b>{html.escape(day)}</b>\n"
+            f"⏰ Час: <b>{html.escape(time_slot)}</b>"
+        )
+        if note:
+            summary += f"\n📝 Додатково: <i>{html.escape(note)}</i>"
+
+        try:
+            await bot.send_message(chat_id=invite.sender_tg_id, text=summary)
+        except Exception as exc:
+            logging.warning("Не вдалося надіслати повідомлення відправнику %s: %s", invite.sender_tg_id, exc)
+            return web.json_response(
+                {
+                    "ok": False,
+                    "error": "Не вдалося надіслати повідомлення автору запрошення. Перевір, чи запущений у нього бот.",
+                },
+                status=500,
+            )
 
         return web.json_response({"ok": True})
 
